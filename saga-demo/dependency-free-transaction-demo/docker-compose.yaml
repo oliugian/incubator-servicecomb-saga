@@ -19,7 +19,7 @@ version: '2.1'
 
 services:
   service-center:
-    image: "servicecomb/service-center"
+    image: "servicecomb/service-center:0.4.0"
     hostname: service-center
     ports:
       - "30100:30100"
