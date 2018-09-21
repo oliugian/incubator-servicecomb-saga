@@ -28,6 +28,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-public class CompositeOmegaCallbackTest {
+public class CompositeOmegaCallbackRunnerTest {
 
   private final OmegaCallback callback1One = Mockito.mock(OmegaCallback.class);
   private final OmegaCallback callback1Two = Mockito.mock(OmegaCallback.class);
@@ -54,7 +55,8 @@ public class CompositeOmegaCallbackTest {
   private final String instanceId2Two = uniquify("instanceId2Two");
 
   private final Map<String, Map<String, OmegaCallback>> callbacks = new ConcurrentHashMap<>();
-  private final CompositeOmegaCallback compositeOmegaCallback = new CompositeOmegaCallback(callbacks);
+  private final CompositeOmegaCallbackRunner compositeOmegaCallbackRunner = new CompositeOmegaCallbackRunner(callbacks,
+      Collections.emptyList());
 
   @Before
   public void setUp() throws Exception {
@@ -71,7 +73,7 @@ public class CompositeOmegaCallbackTest {
   public void compensateCorrespondingOmegaInstanceOnly() throws Exception {
     TxEvent event = eventOf(serviceName2, instanceId2One, TxStartedEvent);
 
-    compositeOmegaCallback.compensate(event);
+    compositeOmegaCallbackRunner.compensate(event);
 
     verify(callback1One, never()).compensate(event);
     verify(callback1Two, never()).compensate(event);
@@ -87,7 +89,7 @@ public class CompositeOmegaCallbackTest {
     callbacks.get(serviceName2).remove(instanceId2One);
     TxEvent event = eventOf(serviceName2, instanceId2One, TxStartedEvent);
 
-    compositeOmegaCallback.compensate(event);
+    compositeOmegaCallbackRunner.compensate(event);
 
     verify(callback1One, never()).compensate(event);
     verify(callback1Two, never()).compensate(event);
@@ -104,7 +106,7 @@ public class CompositeOmegaCallbackTest {
     TxEvent event = eventOf(serviceName2, instanceId2One, TxStartedEvent);
 
     try {
-      compositeOmegaCallback.compensate(event);
+      compositeOmegaCallbackRunner.compensate(event);
       expectFailing(AlphaException.class);
     } catch (AlphaException e) {
       assertThat(e.getMessage(), is("No such omega callback found for service " + serviceName2));
@@ -125,7 +127,7 @@ public class CompositeOmegaCallbackTest {
     TxEvent event = eventOf(serviceName2, instanceId2One, TxStartedEvent);
 
     try {
-      compositeOmegaCallback.compensate(event);
+      compositeOmegaCallbackRunner.compensate(event);
       expectFailing(AlphaException.class);
     } catch (AlphaException e) {
       assertThat(e.getMessage(), is("No such omega callback found for service " + serviceName2));
@@ -146,7 +148,7 @@ public class CompositeOmegaCallbackTest {
     TxEvent event = eventOf(serviceName1, instanceId1Two, TxStartedEvent);
 
     try {
-      compositeOmegaCallback.compensate(event);
+      compositeOmegaCallbackRunner.compensate(event);
       expectFailing(RuntimeException.class);
     } catch (RuntimeException ignored) {
     }

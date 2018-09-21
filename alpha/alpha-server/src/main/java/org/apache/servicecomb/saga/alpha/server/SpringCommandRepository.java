@@ -100,4 +100,16 @@ public class SpringCommandRepository implements CommandRepository {
 
     return commands;
   }
+
+  @Override
+  @Segment(name = "findAllCommandsToCompensate", category = "application", library = "kamon")
+  public List<Command> findAllCommandsToCompensate() {
+    return commandRepository.findNewCommands();
+  }
+
+  @Override
+  @Segment(name = "markCommandAsPending", category = "application", library = "kamon")
+  public void markCommandAsPending(String globalTxId, String localTxId) {
+    commandRepository.updateStatusByGlobalTxIdAndLocalTxId(PENDING.name(), globalTxId, localTxId);
+  }
 }

@@ -25,6 +25,7 @@ import static org.apache.servicecomb.saga.common.EventType.TxEndedEvent;
 import static org.apache.servicecomb.saga.common.EventType.TxStartedEvent;
 
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -203,14 +204,12 @@ public class EventScanner implements Runnable {
 
   @Trace("compensate")
   private void compensate() {
-    commandRepository.findFirstCommandToCompensate()
-        .forEach(command -> {
-          LOG.info("Compensating transaction with globalTxId {} and localTxId {}",
-              command.globalTxId(),
-              command.localTxId());
-
-          omegaCallback.compensate(txStartedEventOf(command));
-        });
+    List<TxEvent>compensateTxEvents = new ArrayList<>();
+    commandRepository.findAllCommandsToCompensate()
+        .forEach(command ->
+            compensateTxEvents.add(txStartedEventOf(command))
+        );
+    omegaCallback.compensateAllEvents(compensateTxEvents).forEach(event -> commandRepository.markCommandAsPending(event.globalTxId(),event.localTxId()));
   }
 
   private TxEvent txStartedEventOf(Command command) {

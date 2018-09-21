@@ -28,4 +28,8 @@ public interface CommandRepository {
   List<Command> findUncompletedCommands(String globalTxId);
 
   List<Command> findFirstCommandToCompensate();
+
+  List<Command> findAllCommandsToCompensate();
+
+  void markCommandAsPending(String globalTxId, String localTxId);
 }

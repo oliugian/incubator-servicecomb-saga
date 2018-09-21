@@ -20,6 +20,8 @@
 
 package org.apache.servicecomb.saga.alpha.server;
 
+import java.util.Collections;
+import java.util.List;
 import org.apache.servicecomb.saga.alpha.core.OmegaCallback;
 import org.apache.servicecomb.saga.alpha.core.TxEvent;
 import org.apache.servicecomb.saga.pack.contract.grpc.GrpcCompensateCommand;
@@ -52,4 +54,6 @@ class GrpcOmegaCallback implements OmegaCallback {
   public void disconnect() {
     observer.onCompleted();
   }
+  @Override
+  public List<TxEvent> compensateAllEvents(List<TxEvent> txEvents){ return Collections.emptyList(); }
 }
